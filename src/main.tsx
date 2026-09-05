@@ -106,7 +106,7 @@ function App() {
     <MobilePage lang={lang} />
     <div className="mx-auto hidden h-full max-w-[1440px] grid-cols-[240px_minmax(300px,1fr)_360px] px-16 py-7 lg:grid">
       <Sidebar index={index} go={go} lang={lang} />
-      <section className="grid place-items-center py-0">{item ? <ImacMockup mode={item.phone} /> : index === 0 ? <ContributionGraph lang={lang} /> : <Phone mode="resume" />}</section>
+      <section className="grid place-items-center py-0">{item ? <ImacMockup mode={item.phone} label={`${item.company} — ${item.title}`} /> : index === 0 ? <ContributionGraph lang={lang} /> : <Phone mode="resume" />}</section>
       <section className="relative flex items-center"><Detail index={index} item={item} copy={copy} bio={bio} /></section>
     </div>
   </main>;
@@ -134,7 +134,7 @@ function MobilePage({ lang }: { lang: Lang }) {
     <section className="mobile-hero py-12"><Detail index={0} item={null} copy={copy} bio={bio} /><ContributionGraph lang={lang} /></section>
     {items.map((item, i) => <article id={slug(item.company)} key={item.title} className="scroll-mt-28 border-t border-ink/8 py-10">
       <MobileProjectPreview index={i + 1} item={item} />
-      <div className="mb-8 grid place-items-center"><ImacMockup mode={item.phone} /></div>
+      <div className="mb-8 grid place-items-center"><ImacMockup mode={item.phone} label={`${item.company} — ${item.title}`} /></div>
       <Detail index={i + 1} item={item} copy={copy} bio={bio} />
     </article>)}
     <section id="resume" className="scroll-mt-28 border-t border-ink/8 py-10">
@@ -174,8 +174,8 @@ function Detail({ index, item, copy, bio }: { index: number; item: Item | null; 
   if (!item && index === 0) return <div className="w-full ease-page"><p className="text-[22px] font-semibold leading-tight">{copy.headline}</p><p className="mt-4 max-w-[290px] text-[17px] leading-snug text-muted">{bio.line} {copy.subline}</p></div>;
   if (!item) return <div className="w-full ease-page space-y-9 text-[14px]"><ResumeChoices /><Group title={copy.openTo} values={copy.roles} /><div className="mb-6 grid grid-cols-[92px_1fr] items-start gap-5"><p className="text-muted">{copy.contact}</p><div className="flex items-center gap-3"><IconLink href={mailto(copy)} label="Gmail" icon="mail" /><IconLink href={profile.github} label="GitHub" icon="github" /><IconLink href={profile.linkedin} label="LinkedIn" icon="linkedin" /></div></div></div>;
   return <div key={item.title} className="w-full max-w-[340px] ease-page text-[13px] leading-snug">
-    <div className="mb-6 flex justify-between text-ink"><span>{item.role}</span><span>{`{0${index}}`}</span></div>
-    <div className="mb-7 flex justify-between gap-5"><a className="project-link font-medium" href={item.url} target="_blank" rel="noreferrer">{item.company}</a><span className="text-muted">{item.date}</span></div>
+    <h2 className="mb-6 flex justify-between text-[13px] font-normal text-ink"><span>{item.role}</span><span>{`{0${index}}`}</span></h2>
+    <h3 className="mb-7 flex justify-between gap-5 text-[13px] font-normal"><a className="project-link font-medium" href={item.url} target="_blank" rel="noreferrer">{item.company}</a><span className="text-muted">{item.date}</span></h3>
     <Group title={copy.description} values={[item.description]} />
     <Group title={copy.focus} values={item.focus} />
     <Group title={copy.impact} values={item.impact} />
@@ -237,9 +237,9 @@ function Phone({ mode }: { mode: Item['phone'] }) {
   </div>;
 }
 
-function ImacMockup({ mode }: { mode: Item['phone'] }) {
+function ImacMockup({ mode, label }: { mode: Item['phone']; label: string }) {
   return <div className="imac transition-fade" key={mode}>
-    <img src="/imac.webp" alt="iMac website mockup" />
+    <img src="/imac.webp" alt={`${label} website preview on iMac mockup`} />
     <div className="imac-screen"><WebPreview mode={mode} /></div>
   </div>;
 }
