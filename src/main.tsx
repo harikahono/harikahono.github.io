@@ -254,7 +254,11 @@ function WebPreview({ mode }: { mode: Item['phone'] }) {
 function SequencedVideo({ files }: { files: string[] }) {
   const [index, setIndex] = useState(0);
   const [visible, setVisible] = useState(false);
+  const [playing, setPlaying] = useState(true);
+  const [flash, setFlash] = useState(true);
   const ref = useRef<HTMLDivElement>(null);
+  const video = useRef<HTMLVideoElement>(null);
+  const hide = useRef(0);
   useEffect(() => {
     const el = ref.current;
     if (!el || !('IntersectionObserver' in window)) { setVisible(true); return; }
@@ -262,7 +266,23 @@ function SequencedVideo({ files }: { files: string[] }) {
     io.observe(el);
     return () => io.disconnect();
   }, []);
-  return <div ref={ref} className="web-video-wrap">{visible && <video className="web-video" src={files[index]} autoPlay muted loop={index === files.length - 1} playsInline preload="metadata" onEnded={() => setIndex(i => Math.min(i + 1, files.length - 1))} />}</div>;
+  useEffect(() => () => window.clearTimeout(hide.current), []);
+  useEffect(() => { if (visible) hide.current = window.setTimeout(() => setFlash(false), 1600); }, [visible]);
+  const toggle = () => {
+    const v = video.current;
+    if (!v) return;
+    if (v.paused) { void v.play(); setPlaying(true); }
+    else { v.pause(); setPlaying(false); }
+    setFlash(true);
+    window.clearTimeout(hide.current);
+    hide.current = window.setTimeout(() => setFlash(false), 1200);
+  };
+  return <div ref={ref} className="web-video-wrap" onClick={toggle} role="button" aria-label={playing ? 'Pause preview' : 'Play preview'}>
+    {visible && <video ref={video} className="web-video" src={files[index]} autoPlay muted loop={index === files.length - 1} playsInline preload="metadata" onEnded={() => setIndex(i => Math.min(i + 1, files.length - 1))} />}
+    <span className={`play-badge${!playing || flash ? ' show' : ''}`} aria-hidden="true">{playing
+      ? <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+      : <svg viewBox="0 0 24 24"><path d="M7 5h4v14H7zM13 5h4v14h-4z" /></svg>}</span>
+  </div>;
 }
 
 function GreenScreen() { return <div className="screen"><p className="top">Cash App</p><h2>$4,280</h2><div className="green-card">Green status<br/><b>Direct deposit active</b></div><div className="tile-grid"><span>Pools</span><span>Bitcoin</span><span>Card</span><span>Save</span></div></div>; }

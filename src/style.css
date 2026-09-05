@@ -67,7 +67,10 @@ a { color: inherit; text-decoration: none; }
 .imac-screen { position:absolute; left:7.7%; top:5.8%; width:84.6%; height:55%; overflow:hidden; background:#0b0d0c; }
 .web-preview { height:100%; padding:7% 8%; color:#f7f4eb; background:#111; font-size:clamp(8px, .85vw, 13px); }
 .web-video { width:100%; height:100%; object-fit:contain; display:block; background:#101010; }
-.web-video-wrap { width:100%; height:100%; background:#101010; }
+.web-video-wrap { width:100%; height:100%; background:#101010; position:relative; cursor:pointer; }
+.play-badge { position:absolute; inset:0; margin:auto; width:44px; height:44px; display:grid; place-items:center; border-radius:999px; background:rgb(0 0 0 / .42); opacity:0; transform:scale(.92); transition:opacity .35s ease, transform .35s ease; pointer-events:none; }
+.play-badge.show { opacity:1; transform:scale(1); }
+.play-badge svg { width:18px; height:18px; fill:#f5f4f1; }
 .web-preview nav { display:flex; justify-content:space-between; color:rgb(247 244 235 / .62); font-size:.9em; }
 .web-preview h2 { max-width:68%; margin-top:9%; font-size:2.6em; line-height:.95; letter-spacing:-.06em; font-weight:650; }
 .web-preview nav span { color:rgb(247 244 235 / .38); }
@@ -87,7 +90,7 @@ a { color: inherit; text-decoration: none; }
 .table-lines { margin-top:11%; display:grid; gap:7px; }.table-lines i { height:18px; border-radius:999px; background:#d9d6cc; }.table-lines i:nth-child(even){width:78%}
 .terminal { background:#101010; }.terminal h2 { display:none; }.terminal pre { margin-top:16%; color:#9cffb0; font:600 1.1em/1.65 ui-monospace, SFMono-Regular, Menlo, monospace; white-space:pre-wrap; }
 
-@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition:none!important; animation:none!important; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition:none!important; animation:none!important; } .play-badge { opacity:0; } .play-badge.show { opacity:1; transform:none; } }
 @media (max-width: 1023px) {
   html { scroll-behavior:smooth; }
   body { overflow:auto; }
