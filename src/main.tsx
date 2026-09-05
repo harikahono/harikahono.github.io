@@ -15,7 +15,6 @@ type Item = {
   url: string;
 };
 
-type Resume = { label: string; title: string; detail: string };
 type Lang = 'en' | 'id';
 type ContributionDay = { date: string; count: number; level: number };
 
@@ -45,17 +44,13 @@ const workId: Item[] = [
 ];
 
 const label = {
-  en: { contact: 'Contact', work: 'Work', resume: 'Resume', description: 'Description', focus: 'Focus', impact: 'Impact', link: 'Link', visit: 'Visit project ↗', openTo: 'Open to', roles: ['Internship', 'Freelance', 'Full-time'], headline: 'Build first. Make it make sense.', subline: 'I turn rough ideas into usable systems, products, and interfaces.', emailSubject: 'Interested in your work — [Name / Company]', emailBody: 'Hi Bintang,\n\nI’m interested in your work and would like to invite you to discuss [role / project] at [company].\n\nWould you be open to a quick conversation?\n\nThank you,\n[Name]' },
-  id: { contact: 'Kontak', work: 'Proyek', resume: 'Resume', description: 'Deskripsi', focus: 'Fokus', impact: 'Hasil', link: 'Tautan', visit: 'Lihat proyek ↗', openTo: 'Terbuka untuk', roles: ['Magang', 'Freelance', 'Penuh waktu'], headline: 'Dari ide mentah menjadi produk yang siap dipakai.', subline: 'Saya mengubah ide mentah menjadi sistem, produk, dan antarmuka yang siap dipakai.', emailSubject: 'Tertarik dengan hasil kerja kamu — [Nama / Perusahaan]', emailBody: 'Halo Bintang,\n\nAku tertarik sama hasil kerjamu dan ingin mengajak kamu [diskusi / interview / kolaborasi] untuk [posisi / proyek] di [perusahaan].\n\nBoleh minta waktu untuk ngobrol lebih lanjut?\n\nTerima kasih,\n[Nama]' },
+  en: { contact: 'Contact', work: 'Work', resume: 'Resume', description: 'Description', focus: 'Focus', impact: 'Impact', link: 'Link', visit: 'Visit project ↗', openTo: 'Open to', roles: ['Internship', 'Freelance', 'Full-time'], headline: 'Build first. Make it make sense.', subline: 'I turn rough ideas into usable systems, products, and interfaces.', resumes: [{ label: 'ATS', title: 'Clean resume', detail: 'Plain, scanner-safe, built for HR systems and job portals.', cta: 'Download ↓' }, { label: 'Creative', title: 'Portfolio CV', detail: 'Editorial version for founders, design leads, and direct shares.', cta: 'Download ↓' }], emailSubject: 'Interested in your work — [Name / Company]', emailBody: 'Hi Bintang,\n\nI’m interested in your work and would like to invite you to discuss [role / project] at [company].\n\nWould you be open to a quick conversation?\n\nThank you,\n[Name]' },
+  id: { contact: 'Kontak', work: 'Proyek', resume: 'Resume', description: 'Deskripsi', focus: 'Fokus', impact: 'Hasil', link: 'Tautan', visit: 'Lihat proyek ↗', openTo: 'Terbuka untuk', roles: ['Magang', 'Freelance', 'Penuh waktu'], headline: 'Dari ide mentah menjadi produk yang siap dipakai.', subline: 'Saya mengubah ide mentah menjadi sistem, produk, dan antarmuka yang siap dipakai.', resumes: [{ label: 'ATS', title: 'Resume bersih', detail: 'Polos, aman untuk ATS, cocok untuk sistem HR dan portal loker.', cta: 'Unduh ↓' }, { label: 'Creative', title: 'CV Portofolio', detail: 'Versi editorial untuk founder, design lead, dan kiriman langsung.', cta: 'Unduh ↓' }], emailSubject: 'Tertarik dengan hasil kerja kamu — [Nama / Perusahaan]', emailBody: 'Halo Bintang,\n\nAku tertarik sama hasil kerjamu dan ingin mengajak kamu [diskusi / interview / kolaborasi] untuk [posisi / proyek] di [perusahaan].\n\nBoleh minta waktu untuk ngobrol lebih lanjut?\n\nTerima kasih,\n[Nama]' },
 };
 
 const mailto = (copy: typeof label.en) => `mailto:${profile.email}?subject=${encodeURIComponent(copy.emailSubject)}&body=${encodeURIComponent(copy.emailBody)}`;
 
 const sections: (Item | null)[] = [null, ...work, null];
-const resumes: Resume[] = [
-  { label: 'ATS', title: 'Clean resume', detail: 'Plain, scanner-safe, built for HR systems and job portals.' },
-  { label: 'Creative', title: 'Portfolio CV', detail: 'Editorial version for founders, design leads, and direct shares.' },
-];
 const slug = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
 function useDeck(max: number) {
@@ -172,7 +167,7 @@ function Sidebar({ index, go, lang }: { index: number; go: (i: number) => void; 
 
 function Detail({ index, item, copy, bio }: { index: number; item: Item | null; copy: typeof label.en; bio: typeof profile }) {
   if (!item && index === 0) return <div className="w-full ease-page"><p className="text-[22px] font-semibold leading-tight">{copy.headline}</p><p className="mt-4 max-w-[290px] text-[17px] leading-snug text-muted">{bio.line} {copy.subline}</p></div>;
-  if (!item) return <div className="w-full ease-page space-y-9 text-[14px]"><ResumeChoices /><Group title={copy.openTo} values={copy.roles} /><div className="mb-6 grid grid-cols-[92px_1fr] items-start gap-5"><p className="text-muted">{copy.contact}</p><div className="flex items-center gap-3"><IconLink href={mailto(copy)} label="Gmail" icon="mail" /><IconLink href={profile.github} label="GitHub" icon="github" /><IconLink href={profile.linkedin} label="LinkedIn" icon="linkedin" /></div></div></div>;
+  if (!item) return <div className="w-full ease-page space-y-9 text-[14px]"><ResumeChoices items={copy.resumes} /><Group title={copy.openTo} values={copy.roles} /><div className="mb-6 grid grid-cols-[92px_1fr] items-start gap-5"><p className="text-muted">{copy.contact}</p><div className="flex items-center gap-3"><IconLink href={mailto(copy)} label="Gmail" icon="mail" /><IconLink href={profile.github} label="GitHub" icon="github" /><IconLink href={profile.linkedin} label="LinkedIn" icon="linkedin" /></div></div></div>;
   return <div key={item.title} className="w-full max-w-[340px] ease-page text-[13px] leading-snug">
     <h2 className="mb-6 flex justify-between text-[13px] font-normal text-ink"><span>{item.role}</span><span>{`{0${index}}`}</span></h2>
     <h3 className="mb-7 flex justify-between gap-5 text-[13px] font-normal"><a className="project-link font-medium" href={item.url} target="_blank" rel="noreferrer">{item.company}</a><span className="text-muted">{item.date}</span></h3>
@@ -187,8 +182,8 @@ function Group({ title, values }: { title: string; values: string[] }) {
   return <div className="mb-6 grid grid-cols-[92px_1fr] gap-5"><p className="text-muted">{title}</p><div className="space-y-1.5">{values.map(v => <p key={v}>{v}</p>)}</div></div>;
 }
 
-function ResumeChoices() {
-  return <div className="grid gap-3">{resumes.map(r => <a key={r.label} className="resume-choice" href="#" onClick={(e) => e.preventDefault()}><span>{r.label}</span><b>{r.title}</b><p>{r.detail}</p><em>Download ↓</em></a>)}</div>;
+function ResumeChoices({ items }: { items: { label: string; title: string; detail: string; cta: string }[] }) {
+  return <div className="grid gap-3">{items.map(r => <a key={r.label} className="resume-choice" href="#" onClick={(e) => e.preventDefault()}><span>{r.label}</span><b>{r.title}</b><p>{r.detail}</p><em>{r.cta}</em></a>)}</div>;
 }
 
 function IconLink({ href, label, icon }: { href: string; label: string; icon: 'mail' | 'github' | 'linkedin' }) {
