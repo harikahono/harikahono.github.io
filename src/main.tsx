@@ -246,7 +246,7 @@ function ImacMockup({ mode, label }: { mode: Item['phone']; label: string }) {
 
 function WebPreview({ mode }: { mode: Item['phone'] }) {
   if (mode === 'green') return <SequencedVideo files={['/seiris1.webm', '/seiris2.webm']} />;
-  if (mode === 'sports') return <div className="web-preview z4"><nav>Z4 Foundation<span>Land assets</span></nav><h2>Invest in productive farmland.</h2><div className="land-card"><b>Rice Field Lot A</b><span>64% funded · Solana</span></div><div className="mini-grid"><i/><i/><i/></div></div>;
+  if (mode === 'sports') return <SequencedVideo files={['/z4-1.webm']} />;
   if (mode === 'tempo') return <SequencedVideo files={['/olaatk1.webm', '/olaatk2.webm']} />;
   return <SequencedVideo files={['/wtf1.webm', '/wtf2.webm']} />;
 }
