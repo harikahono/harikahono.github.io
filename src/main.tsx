@@ -253,7 +253,16 @@ function WebPreview({ mode }: { mode: Item['phone'] }) {
 
 function SequencedVideo({ files }: { files: string[] }) {
   const [index, setIndex] = useState(0);
-  return <video className="web-video" src={files[index]} autoPlay muted loop={index === files.length - 1} playsInline preload="metadata" onEnded={() => setIndex(i => Math.min(i + 1, files.length - 1))} />;
+  const [visible, setVisible] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !('IntersectionObserver' in window)) { setVisible(true); return; }
+    const io = new IntersectionObserver(([entry]) => { if (entry.isIntersecting) { setVisible(true); io.disconnect(); } }, { rootMargin: '240px' });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  return <div ref={ref} className="web-video-wrap">{visible && <video className="web-video" src={files[index]} autoPlay muted loop={index === files.length - 1} playsInline preload="metadata" onEnded={() => setIndex(i => Math.min(i + 1, files.length - 1))} />}</div>;
 }
 
 function GreenScreen() { return <div className="screen"><p className="top">Cash App</p><h2>$4,280</h2><div className="green-card">Green status<br/><b>Direct deposit active</b></div><div className="tile-grid"><span>Pools</span><span>Bitcoin</span><span>Card</span><span>Save</span></div></div>; }

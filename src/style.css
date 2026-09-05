@@ -67,6 +67,7 @@ a { color: inherit; text-decoration: none; }
 .imac-screen { position:absolute; left:7.7%; top:5.8%; width:84.6%; height:55%; overflow:hidden; background:#0b0d0c; }
 .web-preview { height:100%; padding:7% 8%; color:#f7f4eb; background:#111; font-size:clamp(8px, .85vw, 13px); }
 .web-video { width:100%; height:100%; object-fit:contain; display:block; background:#101010; }
+.web-video-wrap { width:100%; height:100%; background:#101010; }
 .web-preview nav { display:flex; justify-content:space-between; color:rgb(247 244 235 / .62); font-size:.9em; }
 .web-preview h2 { max-width:68%; margin-top:9%; font-size:2.6em; line-height:.95; letter-spacing:-.06em; font-weight:650; }
 .web-preview nav span { color:rgb(247 244 235 / .38); }
