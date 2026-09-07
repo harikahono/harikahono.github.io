@@ -109,6 +109,8 @@ function App() {
     const t = window.setTimeout(() => document.documentElement.classList.remove('theme-anim'), 300);
     return () => window.clearTimeout(t);
   }, [theme]);
+  // ponytail: 16KB, biar toggle tema pertama ga kedip
+  useEffect(() => { const i = new Image(); i.src = '/imacdark.webp'; }, []);
   useEffect(() => {
     const mq = matchMedia('(prefers-color-scheme: dark)');
     const fn = (e: MediaQueryListEvent) => { if (!localStorage.getItem('theme')) setTheme(e.matches ? 'dark' : 'light'); };
@@ -125,10 +127,10 @@ function App() {
   const toggleTheme = () => setTheme(current => { const next = current === 'dark' ? 'light' : 'dark'; localStorage.setItem('theme', next); return next; });
   return <main className="min-h-dvh bg-stone text-ink antialiased lg:h-dvh lg:overflow-hidden">
     <div className="top-toggles"><ThemeToggle theme={theme} onClick={toggleTheme} /><LangToggle lang={lang} onClick={switchLang} /></div>
-    <MobilePage lang={lang} onPreview={setPreview} />
+    <MobilePage lang={lang} theme={theme} onPreview={setPreview} />
     <div className="mx-auto hidden h-full max-w-[1440px] grid-cols-[240px_minmax(300px,1fr)_360px] px-16 py-7 lg:grid">
       <Sidebar index={index} go={go} lang={lang} />
-      <section className="grid place-items-center overflow-hidden py-0"><div key={`c-${index}`} className={`grid place-items-center ${deckAnim}`}>{item ? <ImacMockup mode={item.phone} label={`${item.company} — ${item.title}`} /> : index === 0 ? <ContributionGraph lang={lang} /> : <Phone mode="resume" />}</div></section>
+      <section className="grid place-items-center overflow-hidden py-0"><div key={`c-${index}`} className={`grid place-items-center ${deckAnim}`}>{item ? <ImacMockup mode={item.phone} label={`${item.company} — ${item.title}`} theme={theme} /> : index === 0 ? <ContributionGraph lang={lang} /> : <Phone mode="resume" />}</div></section>
       <section className="relative flex items-center overflow-hidden"><div key={`d-${index}`} className={`w-full ${deckAnim}`}><Detail index={index} item={item} copy={copy} bio={bio} onPreview={setPreview} /></div></section>
     </div>
     <PdfModal src={preview} onClose={() => setPreview(null)} lang={lang} />
@@ -147,7 +149,7 @@ function ThemeToggle({ theme, onClick }: { theme: Theme; onClick: () => void }) 
   </button>;
 }
 
-function MobilePage({ lang, onPreview }: { lang: Lang; onPreview: (href: string) => void }) {
+function MobilePage({ lang, theme, onPreview }: { lang: Lang; theme: Theme; onPreview: (href: string) => void }) {
   const items = lang === 'id' ? workId : work;
   const bio = lang === 'id' ? profileId : profile;
   const copy = label[lang];
@@ -165,7 +167,7 @@ function MobilePage({ lang, onPreview }: { lang: Lang; onPreview: (href: string)
     <section className="mobile-hero py-12"><Detail index={0} item={null} copy={copy} bio={bio} onPreview={onPreview} /><ContributionGraph lang={lang} /></section>
     {items.map((item, i) => <article id={slug(item.company)} key={item.title} className="scroll-mt-28 border-t border-ink/8 py-10">
       <MobileProjectPreview index={i + 1} item={item} />
-      <div className="mb-8 grid place-items-center"><ImacMockup mode={item.phone} label={`${item.company} — ${item.title}`} /></div>
+      <div className="mb-8 grid place-items-center"><ImacMockup mode={item.phone} label={`${item.company} — ${item.title}`} theme={theme} /></div>
       <Detail index={i + 1} item={item} copy={copy} bio={bio} onPreview={onPreview} />
     </article>)}
     <section id="resume" className="scroll-mt-28 border-t border-ink/8 py-10">
@@ -292,9 +294,9 @@ function Phone({ mode }: { mode: Item['phone'] }) {
   </div>;
 }
 
-function ImacMockup({ mode, label }: { mode: Item['phone']; label: string }) {
+function ImacMockup({ mode, label, theme }: { mode: Item['phone']; label: string; theme: Theme }) {
   return <div className="imac transition-fade" key={mode}>
-    <img src="/imac.webp" alt={`${label} website preview on iMac mockup`} />
+    <img src={theme === 'dark' ? '/imacdark.webp' : '/imac.webp'} alt={`${label} website preview on iMac mockup`} />
     <div className="imac-screen"><WebPreview mode={mode} /></div>
   </div>;
 }
