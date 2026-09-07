@@ -46,8 +46,8 @@ const workId: Item[] = [
 ];
 
 const label = {
-  en: { contact: 'Contact', work: 'Work', resume: 'Resume', description: 'Description', focus: 'Focus', impact: 'Impact', link: 'Link', visit: 'Visit project ↗', openTo: 'Open to', roles: ['Internship', 'Freelance', 'Full-time'], headline: 'Build first. Make it make sense.', subline: 'I turn rough ideas into usable systems, products, and interfaces.', resumes: [{ label: 'ATS', title: 'Clean resume', detail: 'Plain, scanner-safe, built for HR systems and job portals.', cta: 'Download ↓', href: '/BintangHariKahono_CV_Academy.pdf' }, { label: 'Creative', title: 'Portfolio CV', detail: 'Editorial version for founders, design leads, and direct shares.', cta: 'Coming soon', href: '' }], emailSubject: 'Interested in your work — [Name / Company]', emailBody: 'Hi Bintang,\n\nI’m interested in your work and would like to invite you to discuss [role / project] at [company].\n\nWould you be open to a quick conversation?\n\nThank you,\n[Name]' },
-  id: { contact: 'Kontak', work: 'Proyek', resume: 'Resume', description: 'Deskripsi', focus: 'Fokus', impact: 'Hasil', link: 'Tautan', visit: 'Lihat proyek ↗', openTo: 'Terbuka untuk', roles: ['Magang', 'Freelance', 'Penuh waktu'], headline: 'Dari ide mentah menjadi produk yang siap dipakai.', subline: 'Saya mengubah ide mentah menjadi sistem, produk, dan antarmuka yang siap dipakai.', resumes: [{ label: 'ATS', title: 'Resume bersih', detail: 'Polos, aman untuk ATS, cocok untuk sistem HR dan portal loker.', cta: 'Unduh ↓', href: '/BintangHariKahono_CV_Academy.pdf' }, { label: 'Creative', title: 'CV Portofolio', detail: 'Versi editorial untuk founder, design lead, dan kiriman langsung.', cta: 'Segera hadir', href: '' }], emailSubject: 'Tertarik dengan hasil kerja kamu — [Nama / Perusahaan]', emailBody: 'Halo Bintang,\n\nAku tertarik sama hasil kerjamu dan ingin mengajak kamu [diskusi / interview / kolaborasi] untuk [posisi / proyek] di [perusahaan].\n\nBoleh minta waktu untuk ngobrol lebih lanjut?\n\nTerima kasih,\n[Nama]' },
+  en: { contact: 'Contact', work: 'Work', resume: 'Resume', description: 'Description', focus: 'Focus', impact: 'Impact', link: 'Link', visit: 'Visit project ↗', openTo: 'Open to', roles: ['Internship', 'Freelance', 'Full-time'], headline: 'Build first. Make it make sense.', subline: 'I turn rough ideas into usable systems, products, and interfaces.', resumes: [{ label: 'ATS', title: 'Clean resume', detail: 'Plain, scanner-safe, built for HR systems and job portals.', cta: 'Download ↓', href: '/BintangHariKahono_CV_Academy.pdf' }, { label: 'Creative', title: 'Portfolio CV', detail: 'Editorial version for founders, design leads, and direct shares.', cta: 'Download ↓', href: '/BintangHariKahono_Portfolio_Academy.pdf' }], emailSubject: 'Interested in your work — [Name / Company]', emailBody: 'Hi Bintang,\n\nI’m interested in your work and would like to invite you to discuss [role / project] at [company].\n\nWould you be open to a quick conversation?\n\nThank you,\n[Name]' },
+  id: { contact: 'Kontak', work: 'Proyek', resume: 'Resume', description: 'Deskripsi', focus: 'Fokus', impact: 'Hasil', link: 'Tautan', visit: 'Lihat proyek ↗', openTo: 'Terbuka untuk', roles: ['Magang', 'Freelance', 'Penuh waktu'], headline: 'Dari ide mentah menjadi produk yang siap dipakai.', subline: 'Saya mengubah ide mentah menjadi sistem, produk, dan antarmuka yang siap dipakai.', resumes: [{ label: 'ATS', title: 'Resume bersih', detail: 'Polos, aman untuk ATS, cocok untuk sistem HR dan portal loker.', cta: 'Unduh ↓', href: '/BintangHariKahono_CV_Academy.pdf' }, { label: 'Creative', title: 'CV Portofolio', detail: 'Versi editorial untuk founder, design lead, dan kiriman langsung.', cta: 'Unduh ↓', href: '/BintangHariKahono_Portfolio_Academy.pdf' }], emailSubject: 'Tertarik dengan hasil kerja kamu — [Nama / Perusahaan]', emailBody: 'Halo Bintang,\n\nAku tertarik sama hasil kerjamu dan ingin mengajak kamu [diskusi / interview / kolaborasi] untuk [posisi / proyek] di [perusahaan].\n\nBoleh minta waktu untuk ngobrol lebih lanjut?\n\nTerima kasih,\n[Nama]' },
 };
 
 const mailto = (copy: typeof label.en) => `mailto:${profile.email}?subject=${encodeURIComponent(copy.emailSubject)}&body=${encodeURIComponent(copy.emailBody)}`;
@@ -92,8 +92,8 @@ function useDeck(max: number, disabled = false) {
 
 function App() {
   const [lang, setLang] = useState<Lang>(() => localStorage.getItem('lang') === 'id' ? 'id' : 'en');
-  const [preview, setPreview] = useState(false);
-  const { index, go } = useDeck(sections.length - 1, preview);
+  const [preview, setPreview] = useState<string | null>(null);
+  const { index, go } = useDeck(sections.length - 1, !!preview);
   const items = lang === 'id' ? workId : work;
   const item = index > 0 && index <= items.length ? items[index - 1] : null;
   const copy = label[lang];
@@ -101,13 +101,13 @@ function App() {
   const switchLang = () => setLang(current => { const next = current === 'en' ? 'id' : 'en'; localStorage.setItem('lang', next); return next; });
   return <main className="min-h-dvh bg-stone text-ink antialiased lg:h-dvh lg:overflow-hidden">
     <LangToggle lang={lang} onClick={switchLang} />
-    <MobilePage lang={lang} onPreview={() => setPreview(true)} />
+    <MobilePage lang={lang} onPreview={setPreview} />
     <div className="mx-auto hidden h-full max-w-[1440px] grid-cols-[240px_minmax(300px,1fr)_360px] px-16 py-7 lg:grid">
       <Sidebar index={index} go={go} lang={lang} />
       <section className="grid place-items-center py-0">{item ? <ImacMockup mode={item.phone} label={`${item.company} — ${item.title}`} /> : index === 0 ? <ContributionGraph lang={lang} /> : <Phone mode="resume" />}</section>
-      <section className="relative flex items-center"><Detail index={index} item={item} copy={copy} bio={bio} onPreview={() => setPreview(true)} /></section>
+      <section className="relative flex items-center"><Detail index={index} item={item} copy={copy} bio={bio} onPreview={setPreview} /></section>
     </div>
-    <PdfModal open={preview} onClose={() => setPreview(false)} lang={lang} />
+    <PdfModal src={preview} onClose={() => setPreview(null)} lang={lang} />
   </main>;
 }
 
@@ -115,7 +115,7 @@ function LangToggle({ lang, onClick }: { lang: Lang; onClick: () => void }) {
   return <button className="lang-toggle" onClick={onClick} aria-label="Switch language"><span className={lang === 'en' ? 'active' : ''}>EN</span><i>/</i><span className={lang === 'id' ? 'active' : ''}>ID</span></button>;
 }
 
-function MobilePage({ lang, onPreview }: { lang: Lang; onPreview: () => void }) {
+function MobilePage({ lang, onPreview }: { lang: Lang; onPreview: (href: string) => void }) {
   const items = lang === 'id' ? workId : work;
   const bio = lang === 'id' ? profileId : profile;
   const copy = label[lang];
@@ -169,7 +169,7 @@ function Sidebar({ index, go, lang }: { index: number; go: (i: number) => void; 
   </aside>;
 }
 
-function Detail({ index, item, copy, bio, onPreview }: { index: number; item: Item | null; copy: typeof label.en; bio: typeof profile; onPreview: () => void }) {
+function Detail({ index, item, copy, bio, onPreview }: { index: number; item: Item | null; copy: typeof label.en; bio: typeof profile; onPreview: (href: string) => void }) {
   if (!item && index === 0) return <div className="w-full ease-page"><p className="text-[22px] font-semibold leading-tight">{copy.headline}</p><p className="mt-4 max-w-[290px] text-[17px] leading-snug text-muted">{bio.line} {copy.subline}</p></div>;
   if (!item) return <div className="w-full ease-page space-y-9 text-[14px]"><ResumeChoices items={copy.resumes} onPreview={onPreview} /><Group title={copy.openTo} values={copy.roles} /><div className="mb-6 grid grid-cols-[92px_1fr] items-start gap-5"><p className="text-muted">{copy.contact}</p><div className="flex items-center gap-3"><IconLink href={mailto(copy)} label="Gmail" icon="mail" /><IconLink href={profile.github} label="GitHub" icon="github" /><IconLink href={profile.linkedin} label="LinkedIn" icon="linkedin" /></div></div></div>;
   return <div key={item.title} className="w-full max-w-[340px] ease-page text-[13px] leading-snug">
@@ -186,29 +186,30 @@ function Group({ title, values }: { title: string; values: string[] }) {
   return <div className="mb-6 grid grid-cols-[92px_1fr] gap-5"><p className="text-muted">{title}</p><div className="space-y-1.5">{values.map(v => <p key={v}>{v}</p>)}</div></div>;
 }
 
-function ResumeChoices({ items, onPreview }: { items: { label: string; title: string; detail: string; cta: string; href: string }[]; onPreview: () => void }) {
+function ResumeChoices({ items, onPreview }: { items: { label: string; title: string; detail: string; cta: string; href: string }[]; onPreview: (href: string) => void }) {
   return <div className="grid gap-3">{items.map(r => r.href
-    ? <button key={r.label} className="resume-choice text-left" onClick={onPreview}><span>{r.label}</span><b>{r.title}</b><p>{r.detail}</p><em>{r.cta}</em></button>
+    ? <button key={r.label} className="resume-choice text-left" onClick={() => onPreview(r.href)}><span>{r.label}</span><b>{r.title}</b><p>{r.detail}</p><em>{r.cta}</em></button>
     : <div key={r.label} className="resume-choice soon" aria-disabled="true"><span>{r.label}</span><b>{r.title}</b><p>{r.detail}</p><em>{r.cta}</em></div>)}</div>;
 }
 
-function PdfModal({ open, onClose, lang }: { open: boolean; onClose: () => void; lang: Lang }) {
+function PdfModal({ src, onClose, lang }: { src: string | null; onClose: () => void; lang: Lang }) {
   useEffect(() => {
-    if (!open) return;
+    if (!src) return;
     const key = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     addEventListener('keydown', key);
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => { removeEventListener('keydown', key); document.body.style.overflow = prev; };
-  }, [open, onClose]);
-  if (!open) return null;
+  }, [src, onClose]);
+  if (!src) return null;
+  const name = src.split('/').pop();
   return <div className="pdf-overlay" onClick={onClose} onWheel={e => e.stopPropagation()}>
     <div className="pdf-sheet" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Resume preview">
       <div className="pdf-bar">
-        <span>BintangHariKahono_CV_Academy.pdf</span>
-        <span><a href="/BintangHariKahono_CV_Academy.pdf" download>{lang === 'en' ? 'Download ↓' : 'Unduh ↓'}</a><button onClick={onClose} aria-label="Close preview">✕</button></span>
+        <span>{name}</span>
+        <span><a href={src} download>{lang === 'en' ? 'Download ↓' : 'Unduh ↓'}</a><button onClick={onClose} aria-label="Close preview">✕</button></span>
       </div>
-      <iframe className="pdf-frame" src="/BintangHariKahono_CV_Academy.pdf" title="Resume preview" />
+      <iframe className="pdf-frame" src={src} title={name} />
     </div>
   </div>;
 }
