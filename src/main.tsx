@@ -245,7 +245,7 @@ function WebPreview({ mode }: { mode: Item['phone'] }) {
   if (mode === 'green') return <SequencedVideo files={['/seiris1.webm', '/seiris2.webm']} />;
   if (mode === 'sports') return <SequencedVideo files={['/z4-1.webm']} />;
   if (mode === 'tempo') return <SequencedVideo files={['/olaatk1.webm', '/olaatk2.webm']} />;
-  if (mode === 'pmb') return <div className="web-preview pmb"><nav>PMB PKU-MI<span>Admission portal</span></nav><h2>Admission, end to end.</h2><div className="steps"><i className="done" /><i className="done" /><i className="now" /><i /><i /></div><div className="doc-card"><b>Interview invitation</b><span>Zoom room assigned · PDF generated</span></div></div>;
+  if (mode === 'pmb') return <SequencedVideo files={['/pkumi1.webm']} />;
   return <SequencedVideo files={['/wtf1.webm', '/wtf2.webm']} />;
 }
 
