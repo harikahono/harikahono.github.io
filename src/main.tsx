@@ -16,6 +16,7 @@ type Item = {
 };
 
 type Lang = 'en' | 'id';
+type Theme = 'light' | 'dark';
 type ContributionDay = { date: string; count: number; level: number };
 
 const profile = {
@@ -57,16 +58,19 @@ const slug = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, '-').re
 
 function useDeck(max: number, disabled = false) {
   const [index, setIndex] = useState(0);
+  const [dir, setDir] = useState(1);
+  const indexRef = useRef(0);
   const lock = useRef(0);
   const touchY = useRef(0);
   const wheel = useRef({ delta: 0, timer: 0 });
-  const go = (next: number) => setIndex(Math.max(0, Math.min(max, next)));
-  const step = (dir: number) => {
+  const go = (next: number) => { const c = Math.max(0, Math.min(max, next)); setDir(c >= indexRef.current ? 1 : -1); indexRef.current = c; setIndex(c); };
+  const step = (d: number) => {
     if (disabled || matchMedia('(max-width: 1023px)').matches) return;
     const now = Date.now();
     if (now - lock.current < 750) return;
     lock.current = now;
-    setIndex(current => Math.max(0, Math.min(max, current + dir)));
+    setDir(d >= 0 ? 1 : -1);
+    setIndex(current => { const c = Math.max(0, Math.min(max, current + d)); indexRef.current = c; return c; });
   };
 
   useEffect(() => {
@@ -87,25 +91,45 @@ function useDeck(max: number, disabled = false) {
     return () => { removeEventListener('keydown', key); removeEventListener('wheel', wheelEvent); removeEventListener('touchstart', start); removeEventListener('touchend', end); };
   }, [max]);
 
-  return { index, go };
+  return { index, go, dir };
 }
 
 function App() {
   const [lang, setLang] = useState<Lang>(() => localStorage.getItem('lang') === 'id' ? 'id' : 'en');
+  const [theme, setTheme] = useState<Theme>(() => {
+    const saved = localStorage.getItem('theme');
+    if (saved === 'dark' || saved === 'light') return saved;
+    return matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  });
   const [preview, setPreview] = useState<string | null>(null);
-  const { index, go } = useDeck(sections.length - 1, !!preview);
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#141412' : '#f5f4f1');
+    document.documentElement.classList.add('theme-anim');
+    const t = window.setTimeout(() => document.documentElement.classList.remove('theme-anim'), 300);
+    return () => window.clearTimeout(t);
+  }, [theme]);
+  useEffect(() => {
+    const mq = matchMedia('(prefers-color-scheme: dark)');
+    const fn = (e: MediaQueryListEvent) => { if (!localStorage.getItem('theme')) setTheme(e.matches ? 'dark' : 'light'); };
+    mq.addEventListener('change', fn);
+    return () => mq.removeEventListener('change', fn);
+  }, []);
+  const { index, go, dir } = useDeck(sections.length - 1, !!preview);
+  const deckAnim = dir >= 0 ? 'deck-down' : 'deck-up';
   const items = lang === 'id' ? workId : work;
   const item = index > 0 && index <= items.length ? items[index - 1] : null;
   const copy = label[lang];
   const bio = lang === 'id' ? profileId : profile;
   const switchLang = () => setLang(current => { const next = current === 'en' ? 'id' : 'en'; localStorage.setItem('lang', next); return next; });
+  const toggleTheme = () => setTheme(current => { const next = current === 'dark' ? 'light' : 'dark'; localStorage.setItem('theme', next); return next; });
   return <main className="min-h-dvh bg-stone text-ink antialiased lg:h-dvh lg:overflow-hidden">
-    <LangToggle lang={lang} onClick={switchLang} />
+    <div className="top-toggles"><ThemeToggle theme={theme} onClick={toggleTheme} /><LangToggle lang={lang} onClick={switchLang} /></div>
     <MobilePage lang={lang} onPreview={setPreview} />
     <div className="mx-auto hidden h-full max-w-[1440px] grid-cols-[240px_minmax(300px,1fr)_360px] px-16 py-7 lg:grid">
       <Sidebar index={index} go={go} lang={lang} />
-      <section className="grid place-items-center py-0">{item ? <ImacMockup mode={item.phone} label={`${item.company} — ${item.title}`} /> : index === 0 ? <ContributionGraph lang={lang} /> : <Phone mode="resume" />}</section>
-      <section className="relative flex items-center"><Detail index={index} item={item} copy={copy} bio={bio} onPreview={setPreview} /></section>
+      <section className="grid place-items-center overflow-hidden py-0"><div key={`c-${index}`} className={`grid place-items-center ${deckAnim}`}>{item ? <ImacMockup mode={item.phone} label={`${item.company} — ${item.title}`} /> : index === 0 ? <ContributionGraph lang={lang} /> : <Phone mode="resume" />}</div></section>
+      <section className="relative flex items-center overflow-hidden"><div key={`d-${index}`} className={`w-full ${deckAnim}`}><Detail index={index} item={item} copy={copy} bio={bio} onPreview={setPreview} /></div></section>
     </div>
     <PdfModal src={preview} onClose={() => setPreview(null)} lang={lang} />
   </main>;
@@ -113,6 +137,14 @@ function App() {
 
 function LangToggle({ lang, onClick }: { lang: Lang; onClick: () => void }) {
   return <button className="lang-toggle" onClick={onClick} aria-label="Switch language"><span className={lang === 'en' ? 'active' : ''}>EN</span><i>/</i><span className={lang === 'id' ? 'active' : ''}>ID</span></button>;
+}
+
+function ThemeToggle({ theme, onClick }: { theme: Theme; onClick: () => void }) {
+  return <button className="theme-toggle" onClick={onClick} aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
+    {theme === 'dark'
+      ? <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2" /><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5 5l1.7 1.7M17.3 17.3L19 19M19 5l-1.7 1.7M6.7 17.3L5 19" /></svg>
+      : <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 13.2A8.2 8.2 0 0 1 10.8 4 8.2 8.2 0 1 0 20 13.2Z" /></svg>}
+  </button>;
 }
 
 function MobilePage({ lang, onPreview }: { lang: Lang; onPreview: (href: string) => void }) {
@@ -126,8 +158,8 @@ function MobilePage({ lang, onPreview }: { lang: Lang; onPreview: (href: string)
         <a className="text-[13px] text-ink underline decoration-faint underline-offset-4" href="#resume">{copy.contact}</a>
       </div>
       <nav className="mt-4 flex gap-2 overflow-x-auto pb-1 text-[12px] text-muted" aria-label="Mobile sections">
-        {items.map((item) => <a key={item.title} className="shrink-0 rounded-full bg-white/45 px-3 py-1.5" href={`#${slug(item.company)}`}>{item.company}</a>)}
-        <a className="shrink-0 rounded-full bg-white/45 px-3 py-1.5" href="#resume">{copy.resume}</a>
+        {items.map((item) => <a key={item.title} className="shrink-0 rounded-full bg-card px-3 py-1.5" href={`#${slug(item.company)}`}>{item.company}</a>)}
+        <a className="shrink-0 rounded-full bg-card px-3 py-1.5" href="#resume">{copy.resume}</a>
       </nav>
     </header>
     <section className="mobile-hero py-12"><Detail index={0} item={null} copy={copy} bio={bio} onPreview={onPreview} /><ContributionGraph lang={lang} /></section>
@@ -238,7 +270,7 @@ function ContributionGraph({ lang }: { lang: Lang }) {
 
   return <a className="contrib" href={profile.github} target="_blank" rel="noreferrer" aria-label="GitHub activity">
     <div className="contrib-head"><span>@{profile.handle}</span><b>{lang === 'id' ? 'Aktivitas GitHub' : 'GitHub activity'}</b></div>
-    <div className="contrib-grid">{days.slice(-364).map(day => <i key={day.date} data-level={day.level} title={`${day.date}: ${day.count}`} />)}</div>
+    <div className="contrib-grid">{days.slice(-364).map((day, i) => <i key={day.date} data-level={day.level} className="contrib-cell" style={{ animationDelay: `${Math.min(i * 4, 1200)}ms` }} title={`${day.date}: ${day.count}`} />)}</div>
     <p>{total.toLocaleString()} {lang === 'id' ? 'kontribusi dalam setahun terakhir' : 'contributions in the last year'}</p>
   </a>;
 }
@@ -280,6 +312,7 @@ function SequencedVideo({ files }: { files: string[] }) {
   const [visible, setVisible] = useState(false);
   const [playing, setPlaying] = useState(true);
   const [flash, setFlash] = useState(true);
+  const [ready, setReady] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const video = useRef<HTMLVideoElement>(null);
   const hide = useRef(0);
@@ -301,8 +334,8 @@ function SequencedVideo({ files }: { files: string[] }) {
     window.clearTimeout(hide.current);
     hide.current = window.setTimeout(() => setFlash(false), 1200);
   };
-  return <div ref={ref} className="web-video-wrap" onClick={toggle} role="button" aria-label={playing ? 'Pause preview' : 'Play preview'}>
-    {visible && <video ref={video} className="web-video" src={files[index]} autoPlay muted loop={index === files.length - 1} playsInline preload="metadata" onEnded={() => setIndex(i => Math.min(i + 1, files.length - 1))} />}
+  return <div ref={ref} className={`web-video-wrap${ready ? ' is-ready' : ' is-loading'}`} onClick={toggle} role="button" aria-label={playing ? 'Pause preview' : 'Play preview'}>
+    {visible && <video ref={video} className={`web-video${ready ? ' is-ready' : ''}`} src={files[index]} autoPlay muted loop={index === files.length - 1} playsInline preload="metadata" onLoadedData={() => setReady(true)} onEnded={() => setIndex(i => Math.min(i + 1, files.length - 1))} />}
     <span className={`play-badge${!playing || flash ? ' show' : ''}`} aria-hidden="true">{playing
       ? <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
       : <svg viewBox="0 0 24 24"><path d="M7 5h4v14H7zM13 5h4v14h-4z" /></svg>}</span>
