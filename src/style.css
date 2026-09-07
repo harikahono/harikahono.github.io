@@ -156,6 +156,8 @@ html[data-theme="dark"] .phone { border-color: #000; box-shadow: 0 24px 80px rgb
   html { scroll-behavior:smooth; }
   body { overflow:auto; }
   .top-toggles { top:22px; right:20px; }
+  /* ponytail: kasih jalan buat .top-toggles (fixed) biar ga nimpa link Contact */
+  .mobile-page header > div:first-child { padding-right:96px; }
   .phone { display:block; width:min(330px, 88vw); height:min(610px, 74vh); border-width:10px; border-radius:38px; padding:14px; }
   .imac { width:min(420px, 92vw); margin-inline:0; }
   .contrib { width:100%; margin-top:34px; }
