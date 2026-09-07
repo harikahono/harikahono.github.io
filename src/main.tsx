@@ -55,14 +55,14 @@ const mailto = (copy: typeof label.en) => `mailto:${profile.email}?subject=${enc
 const sections: (Item | null)[] = [null, ...work, null];
 const slug = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
-function useDeck(max: number) {
+function useDeck(max: number, disabled = false) {
   const [index, setIndex] = useState(0);
   const lock = useRef(0);
   const touchY = useRef(0);
   const wheel = useRef({ delta: 0, timer: 0 });
   const go = (next: number) => setIndex(Math.max(0, Math.min(max, next)));
   const step = (dir: number) => {
-    if (matchMedia('(max-width: 1023px)').matches) return;
+    if (disabled || matchMedia('(max-width: 1023px)').matches) return;
     const now = Date.now();
     if (now - lock.current < 750) return;
     lock.current = now;
@@ -92,7 +92,8 @@ function useDeck(max: number) {
 
 function App() {
   const [lang, setLang] = useState<Lang>(() => localStorage.getItem('lang') === 'id' ? 'id' : 'en');
-  const { index, go } = useDeck(sections.length - 1);
+  const [preview, setPreview] = useState(false);
+  const { index, go } = useDeck(sections.length - 1, preview);
   const items = lang === 'id' ? workId : work;
   const item = index > 0 && index <= items.length ? items[index - 1] : null;
   const copy = label[lang];
@@ -100,12 +101,13 @@ function App() {
   const switchLang = () => setLang(current => { const next = current === 'en' ? 'id' : 'en'; localStorage.setItem('lang', next); return next; });
   return <main className="min-h-dvh bg-stone text-ink antialiased lg:h-dvh lg:overflow-hidden">
     <LangToggle lang={lang} onClick={switchLang} />
-    <MobilePage lang={lang} />
+    <MobilePage lang={lang} onPreview={() => setPreview(true)} />
     <div className="mx-auto hidden h-full max-w-[1440px] grid-cols-[240px_minmax(300px,1fr)_360px] px-16 py-7 lg:grid">
       <Sidebar index={index} go={go} lang={lang} />
       <section className="grid place-items-center py-0">{item ? <ImacMockup mode={item.phone} label={`${item.company} — ${item.title}`} /> : index === 0 ? <ContributionGraph lang={lang} /> : <Phone mode="resume" />}</section>
-      <section className="relative flex items-center"><Detail index={index} item={item} copy={copy} bio={bio} /></section>
+      <section className="relative flex items-center"><Detail index={index} item={item} copy={copy} bio={bio} onPreview={() => setPreview(true)} /></section>
     </div>
+    <PdfModal open={preview} onClose={() => setPreview(false)} lang={lang} />
   </main>;
 }
 
@@ -113,7 +115,7 @@ function LangToggle({ lang, onClick }: { lang: Lang; onClick: () => void }) {
   return <button className="lang-toggle" onClick={onClick} aria-label="Switch language"><span className={lang === 'en' ? 'active' : ''}>EN</span><i>/</i><span className={lang === 'id' ? 'active' : ''}>ID</span></button>;
 }
 
-function MobilePage({ lang }: { lang: Lang }) {
+function MobilePage({ lang, onPreview }: { lang: Lang; onPreview: () => void }) {
   const items = lang === 'id' ? workId : work;
   const bio = lang === 'id' ? profileId : profile;
   const copy = label[lang];
@@ -128,14 +130,14 @@ function MobilePage({ lang }: { lang: Lang }) {
         <a className="shrink-0 rounded-full bg-white/45 px-3 py-1.5" href="#resume">{copy.resume}</a>
       </nav>
     </header>
-    <section className="mobile-hero py-12"><Detail index={0} item={null} copy={copy} bio={bio} /><ContributionGraph lang={lang} /></section>
+    <section className="mobile-hero py-12"><Detail index={0} item={null} copy={copy} bio={bio} onPreview={onPreview} /><ContributionGraph lang={lang} /></section>
     {items.map((item, i) => <article id={slug(item.company)} key={item.title} className="scroll-mt-28 border-t border-ink/8 py-10">
       <MobileProjectPreview index={i + 1} item={item} />
       <div className="mb-8 grid place-items-center"><ImacMockup mode={item.phone} label={`${item.company} — ${item.title}`} /></div>
-      <Detail index={i + 1} item={item} copy={copy} bio={bio} />
+      <Detail index={i + 1} item={item} copy={copy} bio={bio} onPreview={onPreview} />
     </article>)}
     <section id="resume" className="scroll-mt-28 border-t border-ink/8 py-10">
-      <Detail index={sections.length - 1} item={null} copy={copy} bio={bio} />
+      <Detail index={sections.length - 1} item={null} copy={copy} bio={bio} onPreview={onPreview} />
     </section>
   </div>;
 }
@@ -167,9 +169,9 @@ function Sidebar({ index, go, lang }: { index: number; go: (i: number) => void; 
   </aside>;
 }
 
-function Detail({ index, item, copy, bio }: { index: number; item: Item | null; copy: typeof label.en; bio: typeof profile }) {
+function Detail({ index, item, copy, bio, onPreview }: { index: number; item: Item | null; copy: typeof label.en; bio: typeof profile; onPreview: () => void }) {
   if (!item && index === 0) return <div className="w-full ease-page"><p className="text-[22px] font-semibold leading-tight">{copy.headline}</p><p className="mt-4 max-w-[290px] text-[17px] leading-snug text-muted">{bio.line} {copy.subline}</p></div>;
-  if (!item) return <div className="w-full ease-page space-y-9 text-[14px]"><ResumeChoices items={copy.resumes} /><Group title={copy.openTo} values={copy.roles} /><div className="mb-6 grid grid-cols-[92px_1fr] items-start gap-5"><p className="text-muted">{copy.contact}</p><div className="flex items-center gap-3"><IconLink href={mailto(copy)} label="Gmail" icon="mail" /><IconLink href={profile.github} label="GitHub" icon="github" /><IconLink href={profile.linkedin} label="LinkedIn" icon="linkedin" /></div></div></div>;
+  if (!item) return <div className="w-full ease-page space-y-9 text-[14px]"><ResumeChoices items={copy.resumes} onPreview={onPreview} /><Group title={copy.openTo} values={copy.roles} /><div className="mb-6 grid grid-cols-[92px_1fr] items-start gap-5"><p className="text-muted">{copy.contact}</p><div className="flex items-center gap-3"><IconLink href={mailto(copy)} label="Gmail" icon="mail" /><IconLink href={profile.github} label="GitHub" icon="github" /><IconLink href={profile.linkedin} label="LinkedIn" icon="linkedin" /></div></div></div>;
   return <div key={item.title} className="w-full max-w-[340px] ease-page text-[13px] leading-snug">
     <h2 className="mb-6 flex justify-between text-[13px] font-normal text-ink"><span>{item.role}</span><span>{`{0${index}}`}</span></h2>
     <h3 className="mb-7 flex justify-between gap-5 text-[13px] font-normal"><a className="project-link font-medium" href={item.url} target="_blank" rel="noreferrer">{item.company}</a><span className="text-muted">{item.date}</span></h3>
@@ -184,10 +186,31 @@ function Group({ title, values }: { title: string; values: string[] }) {
   return <div className="mb-6 grid grid-cols-[92px_1fr] gap-5"><p className="text-muted">{title}</p><div className="space-y-1.5">{values.map(v => <p key={v}>{v}</p>)}</div></div>;
 }
 
-function ResumeChoices({ items }: { items: { label: string; title: string; detail: string; cta: string; href: string }[] }) {
+function ResumeChoices({ items, onPreview }: { items: { label: string; title: string; detail: string; cta: string; href: string }[]; onPreview: () => void }) {
   return <div className="grid gap-3">{items.map(r => r.href
-    ? <a key={r.label} className="resume-choice" href={r.href} download><span>{r.label}</span><b>{r.title}</b><p>{r.detail}</p><em>{r.cta}</em></a>
+    ? <button key={r.label} className="resume-choice text-left" onClick={onPreview}><span>{r.label}</span><b>{r.title}</b><p>{r.detail}</p><em>{r.cta}</em></button>
     : <div key={r.label} className="resume-choice soon" aria-disabled="true"><span>{r.label}</span><b>{r.title}</b><p>{r.detail}</p><em>{r.cta}</em></div>)}</div>;
+}
+
+function PdfModal({ open, onClose, lang }: { open: boolean; onClose: () => void; lang: Lang }) {
+  useEffect(() => {
+    if (!open) return;
+    const key = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    addEventListener('keydown', key);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { removeEventListener('keydown', key); document.body.style.overflow = prev; };
+  }, [open, onClose]);
+  if (!open) return null;
+  return <div className="pdf-overlay" onClick={onClose} onWheel={e => e.stopPropagation()}>
+    <div className="pdf-sheet" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Resume preview">
+      <div className="pdf-bar">
+        <span>BintangHariKahono_CV_Academy.pdf</span>
+        <span><a href="/BintangHariKahono_CV_Academy.pdf" download>{lang === 'en' ? 'Download ↓' : 'Unduh ↓'}</a><button onClick={onClose} aria-label="Close preview">✕</button></span>
+      </div>
+      <iframe className="pdf-frame" src="/BintangHariKahono_CV_Academy.pdf" title="Resume preview" />
+    </div>
+  </div>;
 }
 
 function IconLink({ href, label, icon }: { href: string; label: string; icon: 'mail' | 'github' | 'linkedin' }) {
