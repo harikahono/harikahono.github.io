@@ -230,20 +230,23 @@ function PdfModal({ src, onClose, lang }: { src: string | null; onClose: () => v
   useEffect(() => {
     if (!src) return;
     const key = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    const lock = (e: TouchEvent) => e.preventDefault();
     addEventListener('keydown', key);
+    addEventListener('touchmove', lock, { passive: false });
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    return () => { removeEventListener('keydown', key); document.body.style.overflow = prev; };
+    return () => { removeEventListener('keydown', key); removeEventListener('touchmove', lock); document.body.style.overflow = prev; };
   }, [src, onClose]);
   if (!src) return null;
   const name = src.split('/').pop();
-  return <div className="pdf-overlay" onClick={onClose} onWheel={e => e.stopPropagation()}>
+  const mobile = matchMedia('(max-width: 1023px)').matches;
+  return <div className="pdf-overlay" onClick={onClose}>
     <div className="pdf-sheet" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Resume preview">
       <div className="pdf-bar">
         <span>{name}</span>
-        <span><a href={src} download>{lang === 'en' ? 'Download ↓' : 'Unduh ↓'}</a><button onClick={onClose} aria-label="Close preview">✕</button></span>
+        <span><a href={src} target="_blank" rel="noreferrer">{lang === 'en' ? 'Open ↗' : 'Buka ↗'}</a><a href={src} download>{lang === 'en' ? 'Download ↓' : 'Unduh ↓'}</a><button onClick={onClose} aria-label="Close preview">✕</button></span>
       </div>
-      <iframe className="pdf-frame" src={src} title={name} />
+      {mobile ? <div className="pdf-mobile"><a href={src} target="_blank" rel="noreferrer">{lang === 'en' ? 'Open PDF in new tab ↗' : 'Buka PDF di tab baru ↗'}</a></div> : <iframe className="pdf-frame" src={src} title={name} />}
     </div>
   </div>;
 }

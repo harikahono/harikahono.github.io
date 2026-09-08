@@ -103,6 +103,9 @@ html[data-theme="dark"] .phone { border-color: #000; box-shadow: 0 24px 80px rgb
 .pdf-bar button { color:var(--muted); font-size:13px; transition:color .3s ease; }
 .pdf-bar button:hover { color:var(--ink); }
 .pdf-frame { flex:1; border:0; background:white; }
+.pdf-mobile { flex:1; display:grid; place-items:center; padding:24px; }
+.pdf-mobile a { font-size:15px; font-weight:500; padding:14px 28px; border-radius:12px; background:var(--card); box-shadow:inset 0 0 0 1px var(--line); transition:background .2s ease, transform .16s var(--ease-out); }
+.pdf-mobile a:active { transform:scale(.97); background:var(--card-hover); }
 .icon-link { color:var(--muted); line-height:0; transition: color .2s ease, opacity .2s ease, transform .16s var(--ease-out); }
 .icon-link:active { transform: scale(.97); }
 @media (hover: hover) and (pointer: fine) { .icon-link:hover { color:var(--ink); transform: translateY(-1px); } }
@@ -187,4 +190,6 @@ html[data-theme="dark"] .phone { border-color: #000; box-shadow: 0 24px 80px rgb
   .mobile-page .ease-page .text-muted { font-size:13px; }
   .resume-choice { padding:16px; background:var(--card); }
   .resume-choice p { max-width:none; }
+  .pdf-sheet { height:auto; min-height:200px; }
+  .pdf-bar button { font-size:18px; padding:8px; }
 }
