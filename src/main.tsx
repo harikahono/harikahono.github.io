@@ -273,21 +273,22 @@ function IconLink({ href, label, icon }: { href: string; label: string; icon: 'm
 
 function ContributionGraph({ lang }: { lang: Lang }) {
   const [days, setDays] = useState<ContributionDay[]>(fallbackDays);
-  const [showTooltip, setShowTooltip] = useState(false);
-  const [randomQuote, setRandomQuote] = useState('');
-  const containerRef = useRef<HTMLDivElement>(null);
-  
+  const [tooltip, setTooltip] = useState<{ quote: string; x: number; y: number; visible: boolean }>({ quote: '', x: 0, y: 0, visible: false });
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const lastQuoteRef = useRef<string | null>(null);
+  const cooldownRef = useRef(0);
+
   const total = days.reduce((sum, day) => sum + day.count, 0);
   const isHighActivity = total >= 150;
-  
+
   const quotes = {
     en: {
-      high: ["Creator feels into flow state", "On a coding streak", "Productively building", "Deep in focus mode"],
-      low: ["Creator on holiday", "Taking a break", "Exploring ideas", "Low activity day"]
+      high: ["Creator feels into flow state", "On a coding streak", "Productively building", "Deep in focus mode", "Shipping features like crazy", "Weekend warrior mode activated", "Debugging at 2am again", "Commits speak louder than words"],
+      low: ["Creator on holiday", "Taking a well-deserved break", "Exploring ideas in the wild", "Low activity, high creativity", "Recharge mode: ON", "Plotting the next big thing", "Documentation weekend", "Refactoring the refactor"]
     },
     id: {
-      high: ["Seniman merasa dalam keadaan mengalir", "Pada proses coding", "Membangun secara produktif"],
-      low: ["Seniman sedang liburan", "Istirahat sejenak", "Mengembangkan ide"]
+      high: ["Seniman merasa dalam keadaan mengalir", "Pada proses coding", "Membangun secara produktif", "Fokus mode: ON", "Nge-commit seolah nggak ada besok", "Mode weekend warrior aktif", "Nge-debug jam 2 pagi lagi", "Kode lebih bicara dari kata-kata"],
+      low: ["Seniman sedang liburan", "Istirahat sejenak", "Mengembangkan ide liar", "Aktivitas rendah, kreativitas tinggi", "Mode recharge: ON", "Merencanakan hal besar berikutnya", "Weekend dokumentasi", "Refactor yang refactor"]
     }
   };
 
@@ -301,34 +302,56 @@ function ContributionGraph({ lang }: { lang: Lang }) {
       .catch(() => undefined);
   }, []);
 
-  const handleMouseEnter = () => {
-    const options = isHighActivity ? quotes[lang].high : quotes[lang].low;
-    setRandomQuote(options[Math.floor(Math.random() * options.length)]);
-    setShowTooltip(true);
+  const getQuote = (level: number) => {
+    const pool = isHighActivity ? quotes[lang].high : quotes[lang].low;
+    let quote = pool[Math.floor(Math.random() * pool.length)];
+    const now = Date.now();
+    if (quote === lastQuoteRef.current && now - cooldownRef.current < 1200 && pool.length > 1) {
+      quote = pool[Math.floor(Math.random() * pool.length)];
+    }
+    lastQuoteRef.current = quote;
+    cooldownRef.current = now;
+    return quote;
   };
 
-  const handleMouseLeave = () => {
-    setShowTooltip(false);
+  const handleCellEnter = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    const quote = getQuote(0);
+    const rect = wrapRef.current?.getBoundingClientRect();
+    const x = rect ? event.clientX - rect.left : 0;
+    const y = rect ? event.clientY - rect.top : 0;
+    setTooltip({ quote, x, y, visible: true });
   };
+
+  const handleCellLeave = () => setTooltip(current => ({ ...current, visible: false }));
+  const handleGraphLeave = () => setTooltip(current => ({ ...current, visible: false }));
 
   return (
-    <a 
-      className="contrib" 
-      href={profile.github} 
-      target="_blank" 
-      rel="noreferrer" 
+    <a
+      className="contrib"
+      href={profile.github}
+      target="_blank"
+      rel="noreferrer"
       aria-label="GitHub activity"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      onMouseLeave={handleGraphLeave}
     >
       <div className="contrib-head"><span>@{profile.handle}</span><b>{lang === 'id' ? 'Aktivitas GitHub' : 'GitHub activity'}</b></div>
-      <div className="contrib-grid">{days.slice(-364).map((day, i) => <i key={day.date} data-level={day.level} className="contrib-cell" style={{ animationDelay: `${Math.min(i * 4, 1200)}ms` }} title={`${day.date}: ${day.count}`} />)}</div>
+      <div ref={wrapRef} className="contrib-grid">
+        {days.slice(-364).map((day, i) => (
+          <i
+            key={day.date}
+            data-level={day.level}
+            className="contrib-cell"
+            style={{ animationDelay: `${Math.min(i * 4, 1200)}ms` }}
+            title={`${day.date}: ${day.count}`}
+            onMouseEnter={handleCellEnter}
+            onMouseLeave={handleCellLeave}
+          />
+        ))}
+      </div>
       <p>{total.toLocaleString()} {lang === 'id' ? 'kontribusi dalam setahun terakhir' : 'contributions in the last year'}</p>
-      
-      <div ref={containerRef} className="contrib-tooltip-container">
-        {showTooltip && (
-          <div className={`contrib-tooltip ${showTooltip ? 'show' : ''}`}>{randomQuote}</div>
-        )}
+
+      <div className="contrib-tooltip-wrap" style={{ left: tooltip.x, top: tooltip.y }}>
+        <div className={`contrib-tooltip${tooltip.visible ? ' show' : ''}`} role="tooltip">{tooltip.quote}</div>
       </div>
     </a>
   );

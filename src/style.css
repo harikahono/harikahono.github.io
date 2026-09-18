@@ -64,19 +64,18 @@ a { color: inherit; text-decoration: none; }
 
 /* Tooltip for GitHub activity */
 .contrib { position:relative; }
-.contrib-tooltip-container {
+.contrib-tooltip-wrap {
   position:absolute;
-  right:100%;
-  top:50%;
-  transform:translateY(-50%);
-  margin-left:8px;
-  z-index:49;
+  left:0;
+  top:0;
+  z-index:45;
+  pointer-events:none;
 }
 .contrib-tooltip {
   position:absolute;
-  left:100%;
-  top:50%;
-  transform:translateY(-50%) translateX(-4px);
+  bottom:100%;
+  left:50%;
+  transform:translateX(-50%) translateY(6px);
   background:var(--card);
   border:1px solid var(--line);
   border-radius:8px;
@@ -86,40 +85,28 @@ a { color: inherit; text-decoration: none; }
   white-space:nowrap;
   opacity:0;
   pointer-events:none;
-  transition:opacity .2s ease, transform .2s var(--ease-out);
-  z-index:50;
+  transition:opacity .18s ease, transform .18s var(--ease-out);
   box-shadow:0 2px 8px rgb(0 0 0 / .06);
+  margin-bottom:10px;
 }
 .contrib-tooltip.show {
-  opacity:.85;
-  transform:translateY(-50%) translateX(0);
+  opacity:.9;
+  transform:translateX(-50%) translateY(0);
+  animation: tooltip-pop .32s cubic-bezier(.34,1.56,.64,1) both;
 }
 .contrib-tooltip::before {
   content:'';
   position:absolute;
-  right:100%;
-  top:50%;
-  transform:translateY(-50%);
-  border:6px solid transparent;
-  border-right-color:var(--card);
+  left:50%;
+  top:100%;
+  transform:translateX(-50%);
+  border:5px solid transparent;
+  border-top-color:var(--card);
 }
 
-@media (max-width: 1023px) {
-  .contrib-tooltip {
-    left:50%;
-    top:100%;
-    transform:translateX(-50%) translateY(-4px);
-    margin-left:0;
-    margin-top:8px;
-  }
-  .contrib-tooltip::before {
-    left:50%;
-    right:auto;
-    top:-12px;
-    transform:translateX(-50%) rotate(270deg);
-    border-right-color:transparent;
-    border-bottom-color:var(--card);
-  }
+@keyframes tooltip-pop {
+  0% { opacity:0; transform:translateX(-50%) translateY(6px) scale(.92); }
+  100% { opacity:.9; transform:translateX(-50%) translateY(0) scale(1); }
 }
 .ease-text { transition: opacity .24s var(--ease-out), transform .24s var(--ease-out), color .2s ease; }
 .ease-page { animation: page-in .24s var(--ease-out) both; }
