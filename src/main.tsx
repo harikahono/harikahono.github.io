@@ -283,12 +283,124 @@ function ContributionGraph({ lang }: { lang: Lang }) {
 
   const quotes = {
     en: {
-      high: ["Creator feels into flow state", "On a coding streak", "Productively building", "Deep in focus mode", "Shipping features like crazy", "Weekend warrior mode activated", "Debugging at 2am again", "Commits speak louder than words"],
-      low: ["Creator on holiday", "Taking a well-deserved break", "Exploring ideas in the wild", "Low activity, high creativity", "Recharge mode: ON", "Plotting the next big thing", "Documentation weekend", "Refactoring the refactor"]
+      high: [
+        "In the zone, leave me alone",
+        "Coffee-powered development",
+        "Shipping before lunch",
+        "Deep work, don't touch me",
+        "Refactoring at 3am, no regrets",
+        "Bug hunter mode",
+        "Code is poetry, I'm the poet",
+        "Keyboard warrior, literally",
+        "Git push --force with confidence",
+        "It's not a bug, it's a feature",
+        "I'll fix it in the next commit",
+        "Just shipped something",
+        "Currently winning at git",
+        "On a roll, don't stop me",
+        "Debugging life, one commit at a time",
+        "My cursor has feelings too",
+        "Compiling... wait, why is it compiling?",
+        "npm install --save my_sanity",
+        "The code works, I don't know why",
+        "Commit first, ask questions later"
+      ],
+      medium: [
+        "Consistent contributor, occasionally distracted",
+        "Solid contributor, averaging life and code",
+        "Productive but human",
+        "Balanced commits and coffee breaks",
+        "Steady hands, occasional chaos",
+        "Commits on autopilot",
+        "Regularly irregular contributor",
+        "Mostly shipping, sometimes thinking",
+        "Code rhythm: occasional swing",
+        "Semi-productive, fully caffeinated",
+        "Between deep work and deep distraction",
+        "Output: decent. Vibes: good"
+      ],
+      low: [
+        "Procaffeinating: before coffee, no commits",
+        "Searching for inspiration...",
+        "In a meeting, apparently",
+        "Git status: clean, suspiciously clean",
+        "Brain.exe has stopped working",
+        "Buffering...",
+        "Just here for the git log drama",
+        "Contemplating the meaning of semicolons",
+        "Weekend project: finding weekend project",
+        "On a git status --inspiration",
+        "My other computer is your computer",
+        "404: motivation not found",
+        "Currently accepting bug reports",
+        "Out of office, back never",
+        "On a break from breaking things",
+        "Thinking about thinking about coding",
+        "Status: loading...",
+        "Error 418: I'm a teapot",
+        "Waiting for the muse to show up",
+        "Just vibing with syntax"
+      ]
     },
     id: {
-      high: ["Seniman merasa dalam keadaan mengalir", "Pada proses coding", "Membangun secara produktif", "Fokus mode: ON", "Nge-commit seolah nggak ada besok", "Mode weekend warrior aktif", "Nge-debug jam 2 pagi lagi", "Kode lebih bicara dari kata-kata"],
-      low: ["Seniman sedang liburan", "Istirahat sejenak", "Mengembangkan ide liar", "Aktivitas rendah, kreativitas tinggi", "Mode recharge: ON", "Merencanakan hal besar berikutnya", "Weekend dokumentasi", "Refactor yang refactor"]
+      high: [
+        "Di zona, jangan ganggu",
+        "Kopi-powered development",
+        "Nge-commit sebelum makan siang",
+        "Deep work, jangan sentuh",
+        "Refactor jam 3 pagi, no regret",
+        "Bug hunter mode: aktif",
+        "Kode itu puisi, saya penyairnya",
+        "Keyboard warrior, literally",
+        "Git push --force dengan percaya diri",
+        "Bukan bug, itu fitur",
+        "Saya perbaiki di commit berikutnya",
+        "Baru aja ngeluncur sesuatu",
+        "Sekarang menang di git",
+        "Lagi panas, jangan hentikan",
+        "Nge-debug kehidupan, satu commit",
+        "Kursor saya juga punya perasaan",
+        "Compiling... wait, kok compiling?",
+        "npm install --save my_sanity",
+        "Kodenya jalan, saya nggak tahu kenapa",
+        "Commit dulu, tanya nanti"
+      ],
+      medium: [
+        "Kontributor konsisten, kadang teralihkan",
+        "Kontributor solid, menyeimbangkan kehidupan dan kode",
+        "Produktif tapi manusia",
+        "Commit dan kopi dalam keseimbangan",
+        "Tangan stabil, kadang chaos",
+        "Commit otomatis",
+        "Kontributor reguler tapi tidak teratur",
+        "Kebanyakan ngeluncur, kadang mikir",
+        "Ritme kode: sesekali goyang",
+        "Semi-produktif, fully ngopi",
+        "Antara deep work dan deep distraksi",
+        "Output: cukup. Vibes: bagus"
+      ],
+      low: [
+        "Procaffeinating: sebelum kopi, nggak commit",
+        "Mencari inspirasi...",
+        "Di rapat, rupanya",
+        "Git status: bersih, terlalu bersih",
+        "Brain.exe telah berhenti bekerja",
+        "Buffering...",
+        "Cuma mau lihat drama git log",
+        "Merenungkan arti titik koma",
+        "Proyek weekend: mencari proyek weekend",
+        "On a git status --inspiration",
+        "Komputer lainku adalah komputer kamu",
+        "404: motivasi tidak ditemukan",
+        "Sekarang menerima laporan bug",
+        "Out of office, back never",
+        "Istirahat dari merusak hal",
+        "Pikir-pikir ngoding",
+        "Status: loading...",
+        "Error 418: saya teko",
+        "Menunggu muse datang",
+        "Cuma mau dengerin vinyal"
+      ]
     }
   };
 
@@ -303,7 +415,11 @@ function ContributionGraph({ lang }: { lang: Lang }) {
   }, []);
 
   const getQuote = (level: number) => {
-    const pool = isHighActivity ? quotes[lang].high : quotes[lang].low;
+    let pool;
+    if (total >= 150) pool = quotes[lang].high;
+    else if (total >= 75) pool = quotes[lang].medium;
+    else pool = quotes[lang].low;
+
     let quote = pool[Math.floor(Math.random() * pool.length)];
     const now = Date.now();
     if (quote === lastQuoteRef.current && now - cooldownRef.current < 1200 && pool.length > 1) {
