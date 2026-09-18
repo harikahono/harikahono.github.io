@@ -63,12 +63,12 @@ a { color: inherit; text-decoration: none; }
 .sidebar-scroll-hint.show { opacity:.75; transform:translate(-50%, 0); }
 
 /* Tooltip for GitHub activity */
-.contrib { position:relative; }
+.contrib { position:relative; z-index:0; }
 .contrib-tooltip-wrap {
   position:absolute;
   left:0;
   top:0;
-  z-index:45;
+  z-index:60;
   pointer-events:none;
 }
 .contrib-tooltip {
@@ -76,7 +76,7 @@ a { color: inherit; text-decoration: none; }
   top:-10px;
   left:50%;
   transform:translateX(-50%) translateY(-100%);
-  background:var(--card);
+  background:var(--card-hover);
   border:1px solid var(--line);
   border-radius:8px;
   padding:8px 12px;
@@ -85,11 +85,13 @@ a { color: inherit; text-decoration: none; }
   white-space:nowrap;
   opacity:0;
   pointer-events:none;
-  transition:opacity .18s ease, transform .18s var(--ease-out);
+  transition:opacity .18s ease, transform .18s var(--ease-out), background .18s ease;
   box-shadow:0 2px 8px rgb(0 0 0 / .06);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 .contrib-tooltip.show {
-  opacity:.9;
+  opacity:1;
   transform:translateX(-50%) translateY(-100%);
   animation: tooltip-pop .32s cubic-bezier(.34,1.56,.64,1) both;
 }
@@ -100,12 +102,12 @@ a { color: inherit; text-decoration: none; }
   top:100%;
   transform:translateX(-50%);
   border:5px solid transparent;
-  border-top-color:var(--card);
+  border-top-color:var(--card-hover);
 }
 
 @keyframes tooltip-pop {
   0% { opacity:0; transform:translateX(-50%) translateY(6px) scale(.92); }
-  100% { opacity:.9; transform:translateX(-50%) translateY(0) scale(1); }
+  100% { opacity:1; transform:translateX(-50%) translateY(-100%) scale(1); }
 }
 .ease-text { transition: opacity .24s var(--ease-out), transform .24s var(--ease-out), color .2s ease; }
 .ease-page { animation: page-in .24s var(--ease-out) both; }
