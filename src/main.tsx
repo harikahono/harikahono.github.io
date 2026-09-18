@@ -191,15 +191,25 @@ function Sidebar({ index, go, lang }: { index: number; go: (i: number) => void; 
   const bio = lang === 'id' ? profileId : profile;
   const copy = label[lang];
   const items = lang === 'id' ? workId : work;
-  return <aside className="relative z-10 flex h-full flex-col justify-between text-[13px]">
+  const navRef = useRef<HTMLElement>(null);
+  const [canScroll, setCanScroll] = useState(false);
+  const checkScroll = () => {
+    const el = navRef.current;
+    setCanScroll(!!el && el.scrollTop + el.clientHeight < el.scrollHeight - 4);
+  };
+  useEffect(() => { checkScroll(); addEventListener('resize', checkScroll); return () => removeEventListener('resize', checkScroll); }, [lang]);
+  return <aside className="relative z-10 flex h-full min-h-0 flex-col text-[13px]">
     <div className="space-y-10">
       <div className="hidden lg:block"><h1 className="ease-text text-2xl font-semibold leading-none">{bio.name}</h1><p className="ease-text mt-2 text-muted">{bio.tagline}</p></div>
       <div className="flex gap-2 pt-1" aria-label="Section navigation">{sections.map((_, i) => <button key={i} aria-label={`Go to section ${i + 1}`} onClick={() => go(i)} className={`h-[2px] rounded-full transition-[width,opacity,background-color] duration-200 ease-out active:scale-95 ${i === index ? 'w-9 bg-ink' : 'w-4 bg-faint hover:bg-muted'}`} />)}</div>
-      <nav className="space-y-6 md:space-y-5">
-        <button onClick={() => go(0)} className={`block space-y-1 text-left ease-text ${index === 0 ? 'opacity-100' : 'opacity-45 hover:opacity-80'}`} aria-label="Go to intro"><p className="font-medium text-ink">{bio.name}</p><p className="text-muted">{copy.work}</p></button>
-        {items.map((item, i) => <button key={item.title} onClick={() => go(i + 1)} aria-label={`Open details for ${item.company} ${item.title}`} aria-expanded={index === i + 1} className={`block text-left transition-[opacity,transform] duration-200 ease-out active:scale-[0.97] ${index === i + 1 ? 'translate-x-0 opacity-100' : 'opacity-45 hover:opacity-80 lg:translate-x-0'}`}><p className="text-ink">{item.company}</p><p className="text-muted">{item.title}</p></button>)}
-        <button onClick={() => go(sections.length - 1)} className={`block space-y-1 pt-1 text-left transition-[opacity,transform] duration-200 ease-out active:scale-[0.97] ${index === sections.length - 1 ? 'opacity-100' : 'opacity-45 hover:opacity-80'}`}><p className="text-ink">{copy.resume}</p><p className="text-muted">ATS + Creative</p></button>
+    </div>
+    <div className={`sidebar-nav-wrap mt-10 min-h-0 flex-1${canScroll ? ' has-scroll' : ''}`}>
+      <nav ref={navRef} onScroll={checkScroll} onWheel={e => e.stopPropagation()} className="sidebar-nav space-y-6 md:space-y-5">
+          <button onClick={() => go(0)} className={`block space-y-1 text-left ease-text ${index === 0 ? 'opacity-100' : 'opacity-45 hover:opacity-80'}`} aria-label="Go to intro"><p className="font-medium text-ink">{bio.name}</p><p className="text-muted">{copy.work}</p></button>
+          {items.map((item, i) => <button key={item.title} onClick={() => go(i + 1)} aria-label={`Open details for ${item.company} ${item.title}`} aria-expanded={index === i + 1} className={`block text-left transition-[opacity,transform] duration-200 ease-out active:scale-[0.97] ${index === i + 1 ? 'translate-x-0 opacity-100' : 'opacity-45 hover:opacity-80 lg:translate-x-0'}`}><p className="text-ink">{item.company}</p><p className="text-muted">{item.title}</p></button>)}
+          <button onClick={() => go(sections.length - 1)} className={`block space-y-1 pt-1 text-left transition-[opacity,transform] duration-200 ease-out active:scale-[0.97] ${index === sections.length - 1 ? 'opacity-100' : 'opacity-45 hover:opacity-80'}`}><p className="text-ink">{copy.resume}</p><p className="text-muted">ATS + Creative</p></button>
       </nav>
+      <span className={`sidebar-scroll-hint${canScroll ? ' show' : ''}`} aria-hidden="true">⌄</span>
     </div>
     <p className="hidden text-xs text-faint lg:block">Designed &amp; built by hand</p>
   </aside>;
