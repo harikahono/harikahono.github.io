@@ -73,9 +73,9 @@ a { color: inherit; text-decoration: none; }
 }
 .contrib-tooltip {
   position:absolute;
-  bottom:100%;
+  top:-10px;
   left:50%;
-  transform:translateX(-50%) translateY(6px);
+  transform:translateX(-50%) translateY(-100%);
   background:var(--card);
   border:1px solid var(--line);
   border-radius:8px;
@@ -87,11 +87,10 @@ a { color: inherit; text-decoration: none; }
   pointer-events:none;
   transition:opacity .18s ease, transform .18s var(--ease-out);
   box-shadow:0 2px 8px rgb(0 0 0 / .06);
-  margin-bottom:10px;
 }
 .contrib-tooltip.show {
   opacity:.9;
-  transform:translateX(-50%) translateY(0);
+  transform:translateX(-50%) translateY(-100%);
   animation: tooltip-pop .32s cubic-bezier(.34,1.56,.64,1) both;
 }
 .contrib-tooltip::before {
