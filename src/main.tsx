@@ -273,7 +273,23 @@ function IconLink({ href, label, icon }: { href: string; label: string; icon: 'm
 
 function ContributionGraph({ lang }: { lang: Lang }) {
   const [days, setDays] = useState<ContributionDay[]>(fallbackDays);
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [randomQuote, setRandomQuote] = useState('');
+  const containerRef = useRef<HTMLDivElement>(null);
+  
   const total = days.reduce((sum, day) => sum + day.count, 0);
+  const isHighActivity = total >= 150;
+  
+  const quotes = {
+    en: {
+      high: ["Creator feels into flow state", "On a coding streak", "Productively building", "Deep in focus mode"],
+      low: ["Creator on holiday", "Taking a break", "Exploring ideas", "Low activity day"]
+    },
+    id: {
+      high: ["Seniman merasa dalam keadaan mengalir", "Pada proses coding", "Membangun secara produktif"],
+      low: ["Seniman sedang liburan", "Istirahat sejenak", "Mengembangkan ide"]
+    }
+  };
 
   useEffect(() => {
     fetch(`https://github-contributions-api.jogruber.de/v4/${profile.handle}?y=last`)
@@ -285,11 +301,37 @@ function ContributionGraph({ lang }: { lang: Lang }) {
       .catch(() => undefined);
   }, []);
 
-  return <a className="contrib" href={profile.github} target="_blank" rel="noreferrer" aria-label="GitHub activity">
-    <div className="contrib-head"><span>@{profile.handle}</span><b>{lang === 'id' ? 'Aktivitas GitHub' : 'GitHub activity'}</b></div>
-    <div className="contrib-grid">{days.slice(-364).map((day, i) => <i key={day.date} data-level={day.level} className="contrib-cell" style={{ animationDelay: `${Math.min(i * 4, 1200)}ms` }} title={`${day.date}: ${day.count}`} />)}</div>
-    <p>{total.toLocaleString()} {lang === 'id' ? 'kontribusi dalam setahun terakhir' : 'contributions in the last year'}</p>
-  </a>;
+  const handleMouseEnter = () => {
+    const options = isHighActivity ? quotes[lang].high : quotes[lang].low;
+    setRandomQuote(options[Math.floor(Math.random() * options.length)]);
+    setShowTooltip(true);
+  };
+
+  const handleMouseLeave = () => {
+    setShowTooltip(false);
+  };
+
+  return (
+    <a 
+      className="contrib" 
+      href={profile.github} 
+      target="_blank" 
+      rel="noreferrer" 
+      aria-label="GitHub activity"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <div className="contrib-head"><span>@{profile.handle}</span><b>{lang === 'id' ? 'Aktivitas GitHub' : 'GitHub activity'}</b></div>
+      <div className="contrib-grid">{days.slice(-364).map((day, i) => <i key={day.date} data-level={day.level} className="contrib-cell" style={{ animationDelay: `${Math.min(i * 4, 1200)}ms` }} title={`${day.date}: ${day.count}`} />)}</div>
+      <p>{total.toLocaleString()} {lang === 'id' ? 'kontribusi dalam setahun terakhir' : 'contributions in the last year'}</p>
+      
+      <div ref={containerRef} className="contrib-tooltip-container">
+        {showTooltip && (
+          <div className={`contrib-tooltip ${showTooltip ? 'show' : ''}`}>{randomQuote}</div>
+        )}
+      </div>
+    </a>
+  );
 }
 
 const fallbackDays: ContributionDay[] = Array.from({ length: 364 }, (_, i) => {
