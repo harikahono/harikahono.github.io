@@ -26,7 +26,19 @@ try {
   if (!out.includes('Bintang Hari Kahono') || !out.includes('Tangerang')) throw new Error('prerendered HTML missing name/location');
 
   writeFileSync(file, out);
-  console.log(`prerender OK: index.html ${out.length} bytes`);
+
+  // Keep sitemap lastmod in sync with build date (signals freshness to Google).
+  const today = new Date().toISOString().slice(0, 10);
+  for (const p of ['../dist/sitemap.xml', '../public/sitemap.xml']) {
+    const f = fileURLToPath(new URL(p, import.meta.url));
+    try {
+      const sm = readFileSync(f, 'utf8');
+      const next = sm.includes('<lastmod>') ? sm.replace(/<lastmod>[^<]+<\/lastmod>/, `<lastmod>${today}</lastmod>`) : sm.replace('<loc>https://harikahono.github.io/</loc>', `<loc>https://harikahono.github.io/</loc>\n    <lastmod>${today}</lastmod>`);
+      if (next !== sm) writeFileSync(f, next);
+    } catch {} // sitemap missing - skip, not fatal
+  }
+
+  console.log(`prerender OK: index.html ${out.length} bytes, sitemap lastmod=${today}`);
 } finally {
   await server.close();
 }
