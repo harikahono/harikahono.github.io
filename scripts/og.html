@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<style>
+  @font-face {
+    font-family: 'Geist';
+    src: url('../node_modules/@fontsource-variable/geist/files/geist-latin-wght-normal.woff2') format('woff2-variations');
+    font-weight: 100 900;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1200px; height: 630px; overflow: hidden; }
+  body {
+    background: #f5f4f1;
+    color: #1a1a1a;
+    font-family: 'Geist', system-ui, sans-serif;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 72px 80px;
+  }
+  body::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 82% 18%, rgb(41 53 31 / .14), transparent 40%),
+                linear-gradient(115deg, transparent 55%, rgb(26 26 26 / .04));
+  }
+  body::after {
+    content: '';
+    position: absolute;
+    inset: 32px;
+    border: 1px solid rgb(26 26 26 / .10);
+    pointer-events: none;
+  }
+  .kicker { font-size: 20px; color: #8e8c87; letter-spacing: .02em; }
+  h1 { font-size: 92px; font-weight: 600; letter-spacing: -.045em; line-height: .98; margin-top: 18px; }
+  .role { font-size: 30px; color: #444; margin-top: 28px; letter-spacing: -.01em; }
+  .loc { font-size: 22px; color: #8e8c87; margin-top: 10px; }
+  .foot { display: flex; justify-content: space-between; align-items: flex-end; font-size: 20px; color: #8e8c87; }
+  .foot b { color: #1a1a1a; font-weight: 500; }
+  .stack { display: flex; gap: 10px; }
+  .stack span { border: 1px solid rgb(26 26 26 / .16); border-radius: 999px; padding: 6px 14px; font-size: 17px; color: #444; }
+</style>
+</head>
+<body>
+  <div>
+    <p class="kicker">@harikahono</p>
+    <h1>Bintang Hari<br/>Kahono</h1>
+    <p class="role">Frontend · Web · Fullstack Developer</p>
+    <p class="loc">Tangerang, Indonesia</p>
+  </div>
+  <div class="foot">
+    <div class="stack"><span>React</span><span>TypeScript</span><span>Laravel</span><span>PostgreSQL</span></div>
+    <p><b>harikahono.github.io</b></p>
+  </div>
+</body>
+</html>

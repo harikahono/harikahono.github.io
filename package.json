@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build && node scripts/prerender.mjs",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "og": "firefox -no-remote -headless --profile \"$(mktemp -d)\" --window-size=1200,630 --screenshot public/og.png \"file://$PWD/scripts/og.html\""
   },
   "keywords": [],
   "author": "",
